@@ -58,8 +58,7 @@ jobs:
           name: upload to pypi
           environment:
             TWINE_USERNAME: __token__
-            TWINE_PASSWORD: $pypi_token
+            TWINE_PASSWORD: ${pypi_token}
           command: |
-            echo $TWINE_PASSWORD
             . venv/bin/activate
             twine upload dist/*
