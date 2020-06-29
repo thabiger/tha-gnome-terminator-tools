@@ -1,0 +1,105 @@
+#!/usr/bin/python3
+
+__version__ = '0.1'
+
+description = '''
+AWS EC2 Terminator helper, version %s
+Copyright (c) 2020, Tomasz Habiger, <tomasz.habiger@gmail.com>
+''' % __version__
+
+import boto3
+import json
+import datetime
+import jinja2
+import objectpath
+import string
+import random
+import re
+import os
+import sys
+import tempfile
+import subprocess
+import time
+import argparse
+import pkg_resources
+
+client = boto3.client('ec2')
+
+def randomString(stringLength=8):
+    letters = string.ascii_lowercase + string.digits
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+def request(func):
+    def req(*args, **kwargs):
+        response = {}
+        try:
+            response = func(*args, **kwargs)
+            #print(json.dumps(response, indent=4, sort_keys=True, cls=CustomJsonEncoder))
+        except Exception as e:
+            print("Unable to make request, because of: ", e)
+            return None
+        return response
+    return req
+
+@request
+def describe_instances(filters, ids = None):
+    return client.describe_instances(
+        Filters = filters
+    )
+
+class CustomJsonEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.isoformat()   
+
+        return json.JSONEncoder.default(self, obj)
+
+def parse_args(args):
+
+    parser = argparse.ArgumentParser(
+      epilog=description,
+    )
+
+    parser.add_argument('name', metavar=('string'), nargs="+", help='Name tag pattern for instances to connect, ie. name-prefix-*')
+    args = parser.parse_args(args)
+
+    return args
+
+
+def main():
+    args = parse_args(sys.argv[1:])
+
+    if args.name:
+        filters =[
+            {'Name': 'tag:Name', 'Values': args.name}
+        ]
+
+    r = describe_instances(filters)
+    if not r['Reservations']:
+        print ("Searched name pattern not found.")
+        exit(1)
+
+    instances = list(objectpath.Tree(r).execute("$..Reservations..Instances"))
+    for i in instances:
+        i['Name'] = list(objectpath.Tree(i).execute("$..Tags[@.Key is 'Name']"))[0]['Value']
+
+    templateLoader = jinja2.FileSystemLoader(searchpath=pkg_resources.resource_filename('tha-gnome-terminator-tools', '/templates/'))
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template("config.j2")
+    renderedConfig = template.render(
+        instances = instances,
+        group_id = re.match('\w+', " ".join(args.name))[0] + '-' + randomString()
+    )
+
+    fd, path = tempfile.mkstemp()
+    try:
+        with os.fdopen(fd, 'w') as tmp:
+            tmp.write(renderedConfig)
+    finally:
+        subprocess.Popen(["terminator", "-g", path, "--working-directory", ".", "-T", "AWS EC2 Farm: %s" % args.name])
+        time.sleep (5)
+        os.remove(path)
+
+if __name__ == "__main__":
+    main()
