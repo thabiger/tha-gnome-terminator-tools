@@ -60,6 +60,6 @@ jobs:
             TWINE_USERNAME: __token__
             TWINE_PASSWORD: $pypi_token
           command: |
-            echo $TWINE_USERNAME
+            echo $TWINE_PASSWORD
             . venv/bin/activate
             twine upload dist/*
