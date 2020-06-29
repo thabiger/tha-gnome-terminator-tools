@@ -57,7 +57,7 @@ jobs:
       - run:
           name: upload to pypi
           environment:
-            TWINE_USERNAME: "__token__"
+            TWINE_USERNAME: __token__
             TWINE_PASSWORD: $pypi_token
           command: |
             . venv/bin/activate
