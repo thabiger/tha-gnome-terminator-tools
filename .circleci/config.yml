@@ -1,0 +1,51 @@
+version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          context: org
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            make dev
+  deploy:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            make dev
+      - run:
+          name: create packages
+          command: |
+            make package
+      - run:
+          name: upload to pypi
+          command: |
+            . venv/bin/activate
+            export PYPI_USERNAME="__token__"
+            export PYPI_PASSWORD=$pypi_token
+            twine upload dist/*
