@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='tha-gnome-terminator-tools',
-      version=os.getenv('CIRCLE_TAG'),
+      version="0.3.0",
       description='Automation scripts for Gnome Terminator',
       long_description=long_description,
       long_description_content_type="text/markdown",
