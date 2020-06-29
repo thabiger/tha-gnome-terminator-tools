@@ -56,8 +56,9 @@ jobs:
             make package
       - run:
           name: upload to pypi
+          environment:
+            TWINE_USERNAME: "__token__"
+            TWINE_PASSWORD: $pypi_token
           command: |
             . venv/bin/activate
-            export PYPI_USERNAME="__token__"
-            export PYPI_PASSWORD=$pypi_token
             twine upload dist/*
