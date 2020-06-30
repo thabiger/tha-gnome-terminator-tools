@@ -1,6 +1,6 @@
 # tha-gnome-terminator-tools**
 
-Scripts to improve work efficiency using the Gnome Terminator terminal emulator when working with multiple server instances in AWS.
+Scripts to improve work efficiency with multiple server instances in AWS using the Gnome Terminator.
 
 Only one scenario is supported at this moment:
 
