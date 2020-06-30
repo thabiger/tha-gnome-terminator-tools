@@ -1,4 +1,4 @@
-# tha-gnome-terminator-tools**
+# tha-gnome-terminator-tools
 
 Scripts to improve work efficiency with multiple server instances in AWS using the Gnome Terminator.
 
