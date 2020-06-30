@@ -12,14 +12,16 @@ will search for EC2 instances by its names and open SSH connections in separate 
 
 If our servers are named according to the following pattern: `<prefix>.<environment>.<domain.tld>`, ie:
 
-> app-0.dev.domain.tld
+```
+app-0.dev.domain.tld 
 app-1.dev.domain.tld
->
-> app-0.rc.domain.tld
+
+app-0.rc.domain.tld
 app-1.rc.domain.tld
->
-> app-0.prod.domain.tld
+
+app-0.prod.domain.tld
 app-1.prod.domain.tld
+```
 
 then command:
 
